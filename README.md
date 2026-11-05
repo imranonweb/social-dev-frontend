@@ -8,14 +8,12 @@
 
 A modern, high-craft, community-driven event management platform where citizens discover, organize, join, and track local social service initiatives across Bangladesh (Cleanliness Drives, Urban Tree Plantation, Winter Blanket Distribution, Blood Donation Camps, and Food Rescue Drives).
 
-Built for **Assignment B14-A8_Cat-Hermione**.
 
 ---
 
 ## 🌐 Live Deployments & Repositories
 
-- **Client Live Site**: [https://social-dev-frontend.vercel.app](https://social-dev-frontend.vercel.app) *(or your Vercel deployment URL)*
-- **Server Live API**: [https://social-dev-backend.onrender.com](https://social-dev-backend.onrender.com) *(or your local `http://localhost:5000`)*
+- **Client Live Site**: [https://social-dev-frontend.vercel.app](https://social-dev-frontend.vercel.app)
 - **Client Repository**: [https://github.com/imranonweb/social-dev-frontend](https://github.com/imranonweb/social-dev-frontend)
 - **Backend Repository**: [https://github.com/imranonweb/social-dev-backend](https://github.com/imranonweb/social-dev-backend)
 
