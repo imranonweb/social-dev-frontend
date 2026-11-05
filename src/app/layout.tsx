@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
+import { Navbar } from "@/components/shared/navbar";
 
 export const metadata: Metadata = {
   title: "CareServe | Community Social Development Events Platform",
@@ -32,7 +33,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
