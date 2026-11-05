@@ -30,6 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.getToken(email);
       if (res && res.token) {
         localStorage.setItem("access-token", res.token);
+        // Set cookie so server-side middleware recognizes authenticated state
+        if (typeof document !== "undefined") {
+          document.cookie = `access-token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
+        }
         setToken(res.token);
         return res.token;
       }
@@ -77,6 +81,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } else if (!cachedUser) {
           setUser(null);
+          // If no session, clean up stale cookies
+          if (typeof document !== "undefined") {
+            document.cookie = "access-token=; path=/; max-age=0";
+          }
         }
         setLoading(false);
       }
@@ -187,6 +195,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     localStorage.removeItem("access-token");
     localStorage.removeItem("auth-user");
+    if (typeof document !== "undefined") {
+      document.cookie = "access-token=; path=/; max-age=0";
+    }
     setUser(null);
     setToken(null);
     showSuccessToast("Signed Out", "You have been logged out successfully.");
@@ -217,4 +228,3 @@ export function useAuth() {
   }
   return context;
 }
-

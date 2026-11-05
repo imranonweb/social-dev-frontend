@@ -8,10 +8,47 @@ export const fetchWithAuth = async (
   endpoint: string,
   options: RequestInit = {}
 ) => {
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("access-token")
-      : null;
+  let token: string | null = null;
+
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("access-token");
+
+    // If token not found in localStorage, check cookie
+    if (!token) {
+      const match = document.cookie.match(/(?:^|;\s*)access-token=([^;]+)/);
+      if (match) {
+        token = decodeURIComponent(match[1]);
+        localStorage.setItem("access-token", token);
+      }
+    }
+
+    // If still missing, check cached auth user email and request a fresh token
+    if (!token) {
+      const cached = localStorage.getItem("auth-user");
+      if (cached) {
+        try {
+          const u = JSON.parse(cached);
+          if (u.email) {
+            const tokenRes = await fetch(`${API_BASE_URL}/jwt`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: u.email }),
+            });
+            if (tokenRes.ok) {
+              const data = await tokenRes.json();
+              if (data.token) {
+                token = data.token;
+                localStorage.setItem("access-token", data.token);
+                document.cookie = `access-token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+              }
+            }
+          }
+        } catch {
+          // ignore parsing error
+        }
+      }
+    }
+  }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -23,7 +60,36 @@ export const fetchWithAuth = async (
     ? endpoint
     : `${API_BASE_URL}${endpoint}`;
 
-  const res = await fetch(url, { ...options, headers });
+  let res = await fetch(url, { ...options, headers });
+
+  // If token is expired or unauthorized (401/403), attempt recovery once
+  if ((res.status === 401 || res.status === 403) && typeof window !== "undefined") {
+    const cached = localStorage.getItem("auth-user");
+    if (cached) {
+      try {
+        const u = JSON.parse(cached);
+        if (u.email) {
+          const refreshRes = await fetch(`${API_BASE_URL}/jwt`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: u.email }),
+          });
+          if (refreshRes.ok) {
+            const data = await refreshRes.json();
+            if (data.token) {
+              localStorage.setItem("access-token", data.token);
+              document.cookie = `access-token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+              headers.Authorization = `Bearer ${data.token}`;
+              res = await fetch(url, { ...options, headers });
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   if (!res.ok) {
     let errorMsg = `Request failed with status ${res.status}`;
     try {
@@ -59,25 +125,13 @@ export const api = {
   createEvent: async (
     data: CreateEventInput
   ): Promise<{ insertedId?: string; acknowledged?: boolean }> => {
-    // If token is not in storage, attempt to fetch using creatorEmail
-    if (typeof window !== "undefined" && !localStorage.getItem("access-token")) {
-      const email = data.creatorEmail || (localStorage.getItem("auth-user") ? JSON.parse(localStorage.getItem("auth-user")!).email : null);
-      if (email) {
-        try {
-          const res = await api.getToken(email);
-          if (res?.token) {
-            localStorage.setItem("access-token", res.token);
-          }
-        } catch {
-          // Continue anyway
-        }
-      }
-    }
-
     // Ensure thumbnail property is provided for backend validation
     const payload = {
       ...data,
-      thumbnail: data.thumbnail || data.image || "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80",
+      thumbnail:
+        data.thumbnail ||
+        data.image ||
+        "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80",
     };
 
     return fetchWithAuth("/events", {

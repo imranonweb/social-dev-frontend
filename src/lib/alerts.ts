@@ -1,54 +1,43 @@
-import Swal, { SweetAlertOptions } from "sweetalert2";
+import { toast } from "sonner";
+import Swal from "sweetalert2";
 
-// Clean styled Toast for notifications
-export const Toast = Swal.mixin({
-  toast: true,
-  position: "top-end",
-  showConfirmButton: false,
-  timer: 3500,
-  timerProgressBar: true,
-  didOpen: (toast) => {
-    toast.onmouseenter = Swal.stopTimer;
-    toast.onmouseleave = Swal.resumeTimer;
-  },
-  customClass: {
-    popup: "colored-toast shadow-lg rounded-xl border text-sm font-medium",
-  },
-});
+// Export standard Shadcn toast
+export { toast };
 
+/**
+ * Shadcn-based Toast Notifications with explicit cross button and rich colors
+ */
 export const showSuccessToast = (title: string, message?: string) => {
-  return Toast.fire({
-    icon: "success",
-    title,
-    text: message,
+  return toast.success(title, {
+    description: message,
+    closeButton: true,
   });
 };
 
 export const showErrorToast = (title: string, message?: string) => {
-  return Toast.fire({
-    icon: "error",
-    title,
-    text: message,
+  return toast.error(title, {
+    description: message,
+    closeButton: true,
   });
 };
 
 export const showWarningToast = (title: string, message?: string) => {
-  return Toast.fire({
-    icon: "warning",
-    title,
-    text: message,
+  return toast.warning(title, {
+    description: message,
+    closeButton: true,
   });
 };
 
 export const showInfoToast = (title: string, message?: string) => {
-  return Toast.fire({
-    icon: "info",
-    title,
-    text: message,
+  return toast.info(title, {
+    description: message,
+    closeButton: true,
   });
 };
 
-// Confirmation modal for critical actions (Delete Event, Cancel Join)
+/**
+ * Styled Modal for critical confirmations (Delete Event, Cancel Join)
+ */
 export const confirmAction = async (options: {
   title: string;
   text?: string;
@@ -67,13 +56,13 @@ export const confirmAction = async (options: {
     cancelButtonColor: "#64748B", // Slate
     reverseButtons: true,
     customClass: {
-      popup: "rounded-2xl border shadow-2xl p-6",
-      title: "text-lg font-bold",
-      confirmButton: "px-5 py-2.5 rounded-lg text-sm font-semibold",
-      cancelButton: "px-5 py-2.5 rounded-lg text-sm font-semibold",
+      popup: "rounded-3xl border border-border bg-card shadow-2xl p-6",
+      title: "text-lg font-bold text-foreground",
+      htmlContainer: "text-sm text-muted-foreground",
+      confirmButton: "px-5 py-2.5 rounded-xl text-sm font-semibold shadow-md",
+      cancelButton: "px-5 py-2.5 rounded-xl text-sm font-semibold",
     },
   });
 
   return result.isConfirmed;
 };
-

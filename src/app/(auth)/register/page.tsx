@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
@@ -26,13 +26,20 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/";
 
-  const { registerWithEmail } = useAuth();
+  const { user, loading: authLoading, registerWithEmail } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [photoURL, setPhotoURL] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // If already authenticated, redirect to destination
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push(redirectPath);
+    }
+  }, [user, authLoading, router, redirectPath]);
 
   // Password validation rules per assignment specification
   const hasUppercase = /[A-Z]/.test(password);

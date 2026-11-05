@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { Calendar, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, UserCheck } from "lucide-react";
 
 interface EventCardProps {
   event: EventItem;
@@ -31,8 +31,10 @@ export function EventCard({ event, className }: EventCardProps) {
     }
   };
 
+  const organizerName = event.creatorName || event.organizerName || "Verified Organizer";
+
   return (
-    <Card className={`group flex flex-col justify-between overflow-hidden border-border/80 bg-card hover:border-primary/40 hover:shadow-xl transition-all duration-300 ${className}`}>
+    <Card className={`group flex flex-col justify-between overflow-hidden border border-border/80 bg-card hover:border-primary/50 hover:shadow-xl transition-all duration-300 rounded-2xl ${className}`}>
       {/* Top Image Container with Uniform Aspect Ratio */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,10 +43,19 @@ export function EventCard({ event, className }: EventCardProps) {
           alt={event.title}
           className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
         />
+        {/* Ambient Gradient on Image */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+
         <div className="absolute top-3 left-3">
           <Badge variant={getBadgeVariant(event.eventType) as any} className="shadow-md backdrop-blur-md font-semibold text-xs px-2.5 py-0.5">
             {event.eventType}
           </Badge>
+        </div>
+
+        {/* Organizer pill overlay */}
+        <div className="absolute bottom-2.5 left-3 flex items-center gap-1.5 text-[11px] text-white/95 font-medium drop-shadow-md">
+          <UserCheck className="h-3.5 w-3.5 text-emerald-400" />
+          <span className="truncate max-w-[180px]">{organizerName}</span>
         </div>
       </div>
 
@@ -77,7 +88,7 @@ export function EventCard({ event, className }: EventCardProps) {
         <Link href={`/events/${event._id}`} className="w-full">
           <Button
             variant="outline"
-            className="w-full justify-between font-semibold group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all text-xs h-9"
+            className="w-full justify-between font-semibold group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all text-xs h-9 rounded-xl"
           >
             <span>View Event Details</span>
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
@@ -87,4 +98,3 @@ export function EventCard({ event, className }: EventCardProps) {
     </Card>
   );
 }
-
