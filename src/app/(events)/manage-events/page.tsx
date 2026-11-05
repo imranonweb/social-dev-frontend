@@ -215,7 +215,7 @@ export default function ManageEventsPage() {
                         <div className="h-14 w-20 shrink-0 rounded-lg overflow-hidden bg-muted border border-border">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={event.image || "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=400&q=80"}
+                            src={event.thumbnail || event.image || "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=400&q=80"}
                             alt={event.title}
                             className="h-full w-full object-cover"
                           />

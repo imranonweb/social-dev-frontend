@@ -37,13 +37,13 @@ const EVENT_TYPES: EventType[] = [
 
 export default function CreateEventPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, syncBackendToken } = useAuth();
 
   const [title, setTitle] = useState("");
   const [eventType, setEventType] = useState<EventType>("Cleanup");
   const [eventDate, setEventDate] = useState("");
   const [location, setLocation] = useState("");
-  const [image, setImage] = useState("");
+  const [thumbnail, setThumbnail] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -99,35 +99,51 @@ export default function CreateEventPage() {
 
     setSubmitting(true);
 
+    // Make sure we have a fresh backend JWT token for this user
+    try {
+      if (user.email) {
+        await syncBackendToken(user.email);
+      }
+    } catch {
+      // Proceed to try creation
+    }
+
+    const defaultPhoto = "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80";
+    const finalThumbnail = thumbnail.trim() || defaultPhoto;
+
     const payload: CreateEventInput = {
       title: title.trim(),
       eventType,
       eventDate,
       location: location.trim(),
-      image:
-        image.trim() ||
-        "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80",
+      thumbnail: finalThumbnail,
+      image: finalThumbnail,
       description: description.trim(),
-      organizerEmail: user.email,
-      organizerName: user.name || "Community Volunteer",
-      organizerPhoto: user.image || undefined,
+      creatorEmail: user.email,
+      creatorName: user.name || "Community Volunteer",
     };
 
     try {
-      await api.createEvent(payload);
-      showSuccessToast(
-        "Event Created!",
-        `"${title}" has been successfully published to Upcoming Events.`
-      );
-      router.push("/events");
+      const res = await api.createEvent(payload);
+      if (res && (res.insertedId || res.acknowledged)) {
+        showSuccessToast(
+          "Event Created!",
+          `"${title}" has been saved to the database and published.`
+        );
+        router.push("/events");
+      } else {
+        showSuccessToast(
+          "Event Created!",
+          `"${title}" has been published to Upcoming Events.`
+        );
+        router.push("/events");
+      }
     } catch (err: any) {
-      // Fallback for demonstration in case local backend is not actively running
-      console.warn("API create error, recording for local view:", err);
-      showSuccessToast(
-        "Event Created!",
-        `"${title}" has been successfully registered.`
+      console.error("Create event error from backend:", err);
+      showErrorToast(
+        "Failed to Save Event",
+        err.message || "Could not save event to database. Please check backend connection."
       );
-      router.push("/events");
     } finally {
       setSubmitting(false);
     }
@@ -157,7 +173,7 @@ export default function CreateEventPage() {
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
           Mobilize your neighbors around a social development initiative. Fill in
-          the details below to publish your campaign to the community board.
+          the details below to publish your campaign directly to the database.
         </p>
       </div>
 
@@ -262,12 +278,12 @@ export default function CreateEventPage() {
           <Input
             type="url"
             placeholder="https://images.unsplash.com/photo-..."
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
+            value={thumbnail}
+            onChange={(e) => setThumbnail(e.target.value)}
             className="h-11"
           />
           <p className="text-[11px] text-muted-foreground">
-            Provide a direct image URL. If omitted, a high-quality community photo will be assigned automatically.
+            Provide a direct image URL. If left empty, an authentic community banner will be assigned automatically.
           </p>
         </div>
 
@@ -298,7 +314,7 @@ export default function CreateEventPage() {
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Publishing Event...
+                Saving to Database...
               </>
             ) : (
               <>
@@ -312,4 +328,3 @@ export default function CreateEventPage() {
     </div>
   );
 }
-

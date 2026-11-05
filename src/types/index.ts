@@ -12,10 +12,13 @@ export interface EventItem {
   title: string;
   description: string;
   eventType: EventType;
-  image: string;
+  thumbnail?: string;
+  image?: string;
   location: string;
   eventDate: string; // ISO string e.g. YYYY-MM-DD
-  organizerEmail: string;
+  creatorEmail?: string;
+  organizerEmail?: string;
+  creatorName?: string;
   organizerName?: string;
   organizerPhoto?: string;
   createdAt?: string;
@@ -27,24 +30,26 @@ export interface CreateEventInput {
   title: string;
   description: string;
   eventType: EventType;
-  image: string;
+  thumbnail: string;
+  image?: string;
   location: string;
   eventDate: string;
-  organizerEmail?: string;
-  organizerName?: string;
-  organizerPhoto?: string;
+  creatorName?: string;
+  creatorEmail?: string;
 }
 
 export interface JoinedEvent {
   _id: string;
   eventId: string;
   title?: string;
+  eventTitle?: string;
   description?: string;
   eventType?: EventType;
+  thumbnail?: string;
   image?: string;
   location?: string;
   eventDate: string;
-  organizerEmail?: string;
+  creatorEmail?: string;
   userEmail: string;
   userName?: string;
   userPhoto?: string;
@@ -53,6 +58,7 @@ export interface JoinedEvent {
 
 export interface JoinStatusResponse {
   hasJoined: boolean;
+  joinId?: string | null;
   joinedAt?: string;
 }
 
@@ -62,4 +68,3 @@ export interface AuthUser {
   email: string;
   image?: string | null;
 }
-

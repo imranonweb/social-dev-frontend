@@ -209,8 +209,8 @@ export default function JoinedEventsPage() {
               <div className="relative aspect-[16/10] w-full bg-muted overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={joined.image || "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=600&q=80"}
-                  alt={joined.title || "Community Event"}
+                  src={joined.thumbnail || joined.image || "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=600&q=80"}
+                  alt={joined.title || joined.eventTitle || "Community Event"}
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute top-3 left-3">

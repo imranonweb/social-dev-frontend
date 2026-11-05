@@ -64,7 +64,7 @@ export function UpdateEventModal({
       setEventType(event.eventType || "Cleanup");
       setEventDate(event.eventDate ? event.eventDate.split("T")[0] : "");
       setLocation(event.location || "");
-      setImage(event.image || "");
+      setImage(event.thumbnail || event.image || "");
       setDescription(event.description || "");
     }
   }, [event]);
@@ -98,6 +98,7 @@ export function UpdateEventModal({
       eventType,
       eventDate,
       location: location.trim(),
+      thumbnail: image.trim(),
       image: image.trim(),
       description: description.trim(),
     };

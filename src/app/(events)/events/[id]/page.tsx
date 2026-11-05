@@ -297,7 +297,7 @@ export default function EventDetailsPage({
       <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full rounded-3xl overflow-hidden border border-border shadow-xl bg-muted">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={event.image}
+          src={event.thumbnail || event.image || "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80"}
           alt={event.title}
           className="h-full w-full object-cover object-center"
         />
@@ -419,11 +419,11 @@ export default function EventDetailsPage({
 
             <div className="space-y-1">
               <p className="font-bold text-foreground">
-                {event.organizerName || "Verified Community Leader"}
+                {event.creatorName || event.organizerName || "Verified Community Leader"}
               </p>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Mail className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                <span className="truncate">{event.organizerEmail}</span>
+                <span className="truncate">{event.creatorEmail || event.organizerEmail}</span>
               </div>
             </div>
 

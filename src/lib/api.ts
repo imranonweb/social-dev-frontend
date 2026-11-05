@@ -13,10 +13,10 @@ export const fetchWithAuth = async (
       ? localStorage.getItem("access-token")
       : null;
 
-  const headers = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   const url = endpoint.startsWith("http")
@@ -41,7 +41,7 @@ export const fetchWithAuth = async (
 // API Client Methods matching backend specification
 export const api = {
   // Auth Token Issue
-  getToken: (email: string): Promise<{ token: string }> =>
+  getToken: (email: string): Promise<{ success?: boolean; token: string }> =>
     fetchWithAuth("/jwt", {
       method: "POST",
       body: JSON.stringify({ email }),
@@ -56,22 +56,52 @@ export const api = {
   getEventDetails: (id: string): Promise<EventItem> =>
     fetchWithAuth(`/events/${id}`),
 
-  createEvent: (data: CreateEventInput): Promise<{ insertedId?: string; acknowledged?: boolean }> =>
-    fetchWithAuth("/events", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+  createEvent: async (
+    data: CreateEventInput
+  ): Promise<{ insertedId?: string; acknowledged?: boolean }> => {
+    // If token is not in storage, attempt to fetch using creatorEmail
+    if (typeof window !== "undefined" && !localStorage.getItem("access-token")) {
+      const email = data.creatorEmail || (localStorage.getItem("auth-user") ? JSON.parse(localStorage.getItem("auth-user")!).email : null);
+      if (email) {
+        try {
+          const res = await api.getToken(email);
+          if (res?.token) {
+            localStorage.setItem("access-token", res.token);
+          }
+        } catch {
+          // Continue anyway
+        }
+      }
+    }
 
-  getMyEvents: (): Promise<EventItem[]> => fetchWithAuth("/my-events"),
+    // Ensure thumbnail property is provided for backend validation
+    const payload = {
+      ...data,
+      thumbnail: data.thumbnail || data.image || "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80",
+    };
+
+    return fetchWithAuth("/events", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getMyEvents: (email?: string): Promise<EventItem[]> =>
+    fetchWithAuth(`/my-events${email ? `?email=${encodeURIComponent(email)}` : ""}`),
 
   updateEvent: (
     id: string,
     data: Partial<CreateEventInput>
-  ): Promise<{ modifiedCount?: number; acknowledged?: boolean }> =>
-    fetchWithAuth(`/events/${id}`, {
+  ): Promise<{ modifiedCount?: number; acknowledged?: boolean }> => {
+    const payload = {
+      ...data,
+      thumbnail: data.thumbnail || data.image,
+    };
+    return fetchWithAuth(`/events/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data),
-    }),
+      body: JSON.stringify(payload),
+    });
+  },
 
   deleteEvent: (id: string): Promise<{ deletedCount?: number; acknowledged?: boolean }> =>
     fetchWithAuth(`/events/${id}`, {
@@ -100,4 +130,3 @@ export const api = {
       method: "DELETE",
     }),
 };
-
