@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Navbar } from "@/components/shared/navbar";
+import { Footer } from "@/components/shared/footer";
 
 export const metadata: Metadata = {
   title: "CareServe | Community Social Development Events Platform",
@@ -36,6 +37,7 @@ export default function RootLayout({
           <AuthProvider>
             <Navbar />
             <main className="flex-1">{children}</main>
+            <Footer />
           </AuthProvider>
         </ThemeProvider>
       </body>
