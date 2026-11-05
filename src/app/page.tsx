@@ -1,5 +1,6 @@
 import { HeroBanner } from "@/components/home/hero-banner";
 import { FeaturesSection } from "@/components/home/features-section";
+import { RecentEvents } from "@/components/home/recent-events";
 
 export default function HomePage() {
   return (
@@ -9,6 +10,9 @@ export default function HomePage() {
 
       {/* 2. Platform Key Features Grid */}
       <FeaturesSection />
+
+      {/* 3. 6 Nearest Recent Upcoming Events (Dynamic with Skeletons) */}
+      <RecentEvents />
     </div>
   );
 }
